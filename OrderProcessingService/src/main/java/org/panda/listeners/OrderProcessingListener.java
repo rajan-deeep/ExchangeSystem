@@ -3,6 +3,7 @@ package org.panda.listeners;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.panda.listeners.dto.Order;
+import org.panda.services.KafkaProducerService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,11 @@ public class OrderProcessingListener {
     private final PriorityQueue<Order> sellOrders = new PriorityQueue<>(); // Min heap
 
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaProducerService kafkaProducerService;
 
-    public OrderProcessingListener(KafkaTemplate<String, String> kafkaTemplate) {
+    public OrderProcessingListener(KafkaTemplate<String, String> kafkaTemplate, KafkaProducerService kafkaProducerService) {
         this.kafkaTemplate = kafkaTemplate;
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     @KafkaListener(topics = "tata_buy", groupId = "match-making-processing-group")
@@ -68,6 +71,7 @@ public class OrderProcessingListener {
                 sellOrder.reduceQuantity(matchedQuantity);
 
                 log.info("Matched Buy Order: " + buyOrder.getPrice() + " with Sell Order: " + sellOrder.getPrice() + ", matched quantity: " + matchedQuantity);
+                kafkaProducerService.sendMessage("post_order_processing","rajan panda buy-sell order is processed!!!!!");
 
                 if (buyOrder.isFullyProcessed()) {
                     buyOrders.poll();
