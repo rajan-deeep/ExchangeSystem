@@ -23,7 +23,7 @@ curl --location 'http://localhost:8080/api/kafka/orders' \
 }'
 
 what is left?
-1. Storing each matched records into database
+1. Storing each matched records into database by generating unique orderId for each buy/sell order and storing match against it.
 2. Storing price/time data in timeseries db as well.
 3. Send notification to users
 4. Send current price updates through websocket to users
